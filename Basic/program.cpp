@@ -74,6 +74,24 @@ void Program::listAll(){
     }
 }
 
+void Program::exec(EvalState progState){
+    int currentLineNumber = getFirstLineNumber();
+    std::string currentStateName = parsedProgram[currentLineNumber].parsedStatement->getName();
+    while(true){
+        if(currentStateName == "END") break;
+        if(currentStateName == "GOTO"){
+            stateGOTO *stmt = reinterpret_cast<stateGOTO*>(parsedProgram[currentLineNumber].parsedStatement);
+            currentLineNumber = stmt->getLineNumber();
+            if(!parsedProgram.containsKey(currentLineNumber)) throw(ErrorException("LINE NUMBER ERROR"));
+            currentStateName = parsedProgram[currentLineNumber].parsedStatement->getName();
+            continue;
+        }
+        parsedProgram[currentLineNumber].parsedStatement->execute(progState);
+        currentLineNumber = getNextLineNumber(currentLineNumber);
+        if (currentLineNumber == -1) break;
+        currentStateName = parsedProgram[currentLineNumber].parsedStatement->getName();
+    }
+}
 
 
 

@@ -120,7 +120,7 @@ void processLine(string line, Program & program, EvalState & progState) {
        else if(nextToken == "RUN"){
            stateRUN r(scanner);
            r.execute(progState);
-           //program.exec();
+           program.exec(progState);
            return;
        }
        else if(nextToken == "LIST"){

@@ -148,10 +148,12 @@ public:
 
    void listAll();
 
+   void exec(EvalState progState);
+
 private:
    Map<int, statementWithString> parsedProgram;
-   Map<int, statementWithString>::iterator programIter;
-   int currentLineNumber = 0;
+   //Map<int, statementWithString>::iterator programIter;
+  // int currentLineNumber = 0;
 // Fill this in with whatever types and instance variables you need
 
 };
