@@ -172,6 +172,13 @@ public:
 private:
     int lineNum = 0;
 };
+
+class stateCLEAR : public Statement{
+public:
+    stateCLEAR(TokenScanner & scanner);
+    ~stateCLEAR(){}
+    void execute(EvalState & state);
+};
 #endif
 
 

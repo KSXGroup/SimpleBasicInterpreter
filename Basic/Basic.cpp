@@ -34,7 +34,7 @@ int main() {
       try {
          processLine(getLine(), program, programState);
       } catch (ErrorException & ex) {
-         cerr << ex.getMessage() << endl;
+         std::cout << ex.getMessage() << std::endl;
       }
    }
    return 0;
@@ -54,6 +54,7 @@ int main() {
  */
 
 void processLine(string line, Program & program, EvalState & progState) {
+    if(line == "") return;
    TokenScanner scanner;
    std::string nextToken;
    int lineNum = -1;
@@ -65,6 +66,10 @@ void processLine(string line, Program & program, EvalState & progState) {
    //Save it to program
    if(scanner.getTokenType(nextToken) == NUMBER){
        lineNum = atoi(nextToken.c_str());
+       if(!scanner.hasMoreTokens()){
+           program.removeSourceLine(lineNum);
+           return;
+       }
        nextToken = scanner.nextToken();
        if(nextToken == "PRINT"){
            program.addSourceLine(lineNum, line);
@@ -107,32 +112,46 @@ void processLine(string line, Program & program, EvalState & progState) {
            q.execute(progState);
            return;
        }
-       if(nextToken == "PRINT"){
+       else if(nextToken == "PRINT"){
            statePRINT p(scanner);
            p.execute(progState);
            return;
        }
-       if(nextToken == "RUN"){
+       else if(nextToken == "RUN"){
            stateRUN r(scanner);
            r.execute(progState);
            //program.exec();
            return;
        }
-       if(nextToken == "LIST"){
+       else if(nextToken == "LIST"){
            stateLIST lst(scanner);
            lst.execute(progState);
            program.listAll();
        }
-       if(nextToken == "HELP"){
+       else if(nextToken == "HELP"){
            if(scanner.hasMoreTokens()) throw(ErrorException("SYNTAX ERROR"));
            cout << "YOU ARE ON YOUR OWN !" << endl;
            return;
        }
-       if(nextToken == "LET"){
+       else if(nextToken == "LET"){
            stateLET lt(scanner);
            lt.execute(progState);
+           return;
        }
-       throw(ErrorException("SYNTAX ERROR"));
+       else if(nextToken == "INPUT"){
+           stateINPUT ipt(scanner);
+           ipt.execute(progState);
+           line.clear();
+           std::cin.clear();
+           return;
+       }
+       else if(nextToken == "CLEAR"){
+           stateCLEAR clr(scanner);
+           clr.execute(progState);
+           program.clear();
+           return;
+       }
+       else throw(ErrorException("SYNTAX ERROR"));
    }
    /*Expression *exp = parseExp(scanner);
    int value = exp->eval(state);

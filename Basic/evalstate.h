@@ -73,6 +73,10 @@ public:
 
    bool isDefined(std::string var);
 
+   void clear();
+
+   bool isReservedIdentifier(std::string token);
+
 private:
 
    Map<std::string,int> symbolTable;
