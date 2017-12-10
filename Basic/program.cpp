@@ -22,6 +22,11 @@ Program::~Program() {
 }
 
 void Program::clear() {
+    if(parsedProgram.isEmpty()) return;
+    /*for(Map<int, statementWithString>::iterator iter = parsedProgram.begin(); iter != parsedProgram.end(); ++iter){
+        std::cout << *iter << std::endl;
+        parsedProgram.remove(*iter);
+    }*/
     parsedProgram.clear();
    // Replace this stub with your own code
 }
@@ -54,6 +59,7 @@ Statement *Program::getParsedStatement(int lineNumber) {
 }
 
 int Program::getFirstLineNumber() {
+    if(parsedProgram.isEmpty()) return -1;
     return *(parsedProgram.begin());
     // Replace this stub with your own code
 }
@@ -74,19 +80,41 @@ void Program::listAll(){
     }
 }
 
-void Program::exec(EvalState progState){
+void Program::exec(EvalState & progState){
     int currentLineNumber = getFirstLineNumber();
+    if (currentLineNumber == -1){
+        return;
+    }
     std::string currentStateName = parsedProgram[currentLineNumber].parsedStatement->getName();
     while(true){
         if(currentStateName == "END") break;
-        if(currentStateName == "GOTO"){
+        else if(currentStateName == "GOTO"){
             stateGOTO *stmt = reinterpret_cast<stateGOTO*>(parsedProgram[currentLineNumber].parsedStatement);
             currentLineNumber = stmt->getLineNumber();
             if(!parsedProgram.containsKey(currentLineNumber)) throw(ErrorException("LINE NUMBER ERROR"));
             currentStateName = parsedProgram[currentLineNumber].parsedStatement->getName();
             continue;
         }
-        parsedProgram[currentLineNumber].parsedStatement->execute(progState);
+        else if(currentStateName == "IF"){
+            stateIF *stmt =reinterpret_cast<stateIF*>(parsedProgram[currentLineNumber].parsedStatement);
+            stmt -> execute(progState);
+            if(stmt->getResult()){
+                if(!parsedProgram.containsKey(stmt -> getLineNumber())){
+                    //std::cout << stmt-> getLineNumber() << std::endl;
+                    throw(ErrorException("LINE NUMBER ERROR"));
+                }
+               else{
+                    currentLineNumber = stmt -> getLineNumber();
+                    currentStateName = parsedProgram[currentLineNumber].parsedStatement->getName();
+                   // std::cout << currentLineNumber << std::endl;
+                    continue;
+                }
+            }
+        }
+        else{
+            //std::cout << currentLineNumber <<":"<<std::endl;
+            parsedProgram[currentLineNumber].parsedStatement->execute(progState);
+        }
         currentLineNumber = getNextLineNumber(currentLineNumber);
         if (currentLineNumber == -1) break;
         currentStateName = parsedProgram[currentLineNumber].parsedStatement->getName();

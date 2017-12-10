@@ -16,10 +16,8 @@
 #include "evalstate.h"
 #include "exp.h"
 #include "parser.h"
-//#include "program.h"
 #include "../StanfordCPPLib/error.h"
 
-class Statement;
 
 /*
  * Class: Statement
@@ -53,7 +51,7 @@ public:
  * destructor is called when deleting a statement.
  */
 
-    virtual ~Statement(){};
+    virtual ~Statement(){}
 
 /*
  * Method: execute
@@ -68,7 +66,9 @@ public:
 
    virtual void execute(EvalState & state) = 0;
 
-   inline std::string getName() const;
+    inline std::string getName() const{
+        return stateName;
+    }
 
 protected:
    std::string stateName;
@@ -95,7 +95,7 @@ public:
 
 class stateREM : public Statement{
 public:
-    stateREM();
+    stateREM(TokenScanner & scanner);
     ~stateREM() = default;
     void execute(EvalState & state){}
 };
@@ -114,14 +114,16 @@ public:
     stateIF(TokenScanner & scanner);
     ~stateIF();
     void execute(EvalState & state);
-    bool getResult() const;
-    int getLineNumber() const;
+    bool getResult();
+    int getLineNumber();
+
 private:
+    int lineNum = 0;
+    bool ifTrue = true;
     Expression *rightExp = nullptr;
     Expression *leftExp = nullptr;
     std::string op;
-    int lineNumber = 0;
-    bool ifTrue = true;
+
 };
 
 class stateLET : public Statement{
@@ -144,7 +146,7 @@ private:
 
 class stateEND : public Statement{
 public:
-    stateEND();
+    stateEND(TokenScanner &scanner);
     ~stateEND(){}
     void execute(EvalState & state){}
 };

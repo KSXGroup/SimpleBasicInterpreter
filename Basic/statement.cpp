@@ -14,22 +14,22 @@
 using namespace std;
 /* Implementation of the Statement class */
 
-inline std::string Statement::getName() const{
+/*inline std::string Statement::getName() const{
     return stateName;
-}
+}*/
 
 stateQUIT::stateQUIT(){
     stateName = "QUIT";
 }
-void stateQUIT::execute(EvalState &state){
+void stateQUIT::execute(EvalState & state){
     exit(0);
 }
 
-stateREM::stateREM(){
+stateREM::stateREM(TokenScanner & scanner){
     stateName = "REM";
 }
 
-statePRINT::statePRINT(TokenScanner &scanner){
+statePRINT::statePRINT(TokenScanner & scanner){
     stateName = "PRINT";
     exp = parseExp(scanner);
     /*while(scanner.hasMoreTokens()){
@@ -72,14 +72,18 @@ void stateLET::execute(EvalState & state){
 
 stateIF::stateIF(TokenScanner &scanner){
     stateName = "IF";
+    std::string ln;
     leftExp = readE(scanner, 1);
     op = scanner.nextToken();
-    if(op != ">" || op != "<" || op != "=") throw(ErrorException("SYNTAX ERROR"));
+    //std::cout << op << std::endl;
+    if(op != ">" && op != "<" && op != "=") throw(ErrorException("SYNTAX ERROR"));
     rightExp = readE(scanner, 1);
     if(scanner.nextToken() != "THEN"){
         throw(ErrorException("SYNTAX ERROR"));
     }
-    lineNumber = atoi(scanner.nextToken().c_str());
+    ln = scanner.nextToken();
+    lineNum = atoi(ln.c_str());
+    //std::cout << lineNum << std::endl;
 }
 
 stateIF::~stateIF(){
@@ -103,6 +107,15 @@ void stateIF::execute(EvalState &state){
         throw(ErrorException("SYNTAX ERROR"));
     }
 }
+
+bool stateIF::getResult(){
+    return ifTrue;
+}
+
+int stateIF::getLineNumber(){
+    return lineNum;
+}
+
 stateINPUT::stateINPUT(TokenScanner &scanner){
     stateName = "INPUT";
     if (!scanner.hasMoreTokens()) throw(ErrorException("SYNTAX ERROR"));
@@ -161,7 +174,8 @@ void stateINPUT::execute(EvalState &state){
     state.setValue(var, atoi(ipt.c_str()));
 }
 
-stateEND::stateEND(){
+stateEND::stateEND(TokenScanner & scanner){
+    if(scanner.hasMoreTokens()) throw(ErrorException("SYNTAX ERROR"));
     stateName = "END";
 }
 
@@ -200,6 +214,10 @@ stateGOTO::stateGOTO(TokenScanner &scanner){
 
 void stateGOTO::execute(EvalState &state){
     //DO NOTHING
+}
+
+int stateGOTO::getLineNumber() const{
+    return lineNum;
 }
 
 stateCLEAR::stateCLEAR(TokenScanner & scanner){

@@ -30,9 +30,10 @@ struct statementWithString;
 struct statementWithString{
     statementWithString(){}
     statementWithString(std::string s):rawLine(s){}
-    ~statementWithString(){
-        if(parsedStatement) delete parsedStatement;
-    }
+   /* ~statementWithString(){
+        if(parsedStatement != nullptr) delete parsedStatement;
+        parsedStatement = nullptr;
+    }*/
     Statement *parsedStatement = nullptr;
     std::string rawLine;
 };
@@ -148,7 +149,7 @@ public:
 
    void listAll();
 
-   void exec(EvalState progState);
+   void exec(EvalState & progState);
 
 private:
    Map<int, statementWithString> parsedProgram;

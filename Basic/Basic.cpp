@@ -67,41 +67,92 @@ void processLine(string line, Program & program, EvalState & progState) {
    if(scanner.getTokenType(nextToken) == NUMBER){
        lineNum = atoi(nextToken.c_str());
        if(!scanner.hasMoreTokens()){
+           delete program.getParsedStatement(lineNum);
            program.removeSourceLine(lineNum);
            return;
        }
        nextToken = scanner.nextToken();
        if(nextToken == "PRINT"){
            program.addSourceLine(lineNum, line);
-           program.setParsedStatement(lineNum, new statePRINT(scanner));
+           try{
+               statePRINT *tmp = new statePRINT(scanner);
+                program.setParsedStatement(lineNum, tmp);
+           }
+           catch(ErrorException e){
+               std::cout << e.getMessage() << std::endl;
+               //delete program.getParsedStatement(lineNum);
+               program.removeSourceLine(lineNum);
+           }
            return;
        }
        if(nextToken == "LET"){
            program.addSourceLine(lineNum, line);
-           program.setParsedStatement(lineNum, new stateLET(scanner));
+           try{
+               stateLET *tmp = new stateLET(scanner);
+                program.setParsedStatement(lineNum, tmp);
+           }catch(ErrorException e){
+               std::cout << e.getMessage() << std::endl;
+               //delete program.getParsedStatement(lineNum);
+               program.removeSourceLine(lineNum);
+           }
            return;
        }
        if(nextToken == "END"){
            program.addSourceLine(lineNum, line);
+           try{
+               stateEND *tmp = new stateEND(scanner);
+               program.setParsedStatement(lineNum, tmp);
+           }catch(ErrorException e){
+               std::cout << e.getMessage() << std::endl;
+               //delete program.getParsedStatement(lineNum);
+               program.removeSourceLine(lineNum);
+           }
            return;
        }
        if(nextToken == "IF"){
            program.addSourceLine(lineNum, line);
-           program.setParsedStatement(lineNum, new stateIF(scanner));
+           try{
+               stateIF *tmp = new stateIF(scanner);
+                program.setParsedStatement(lineNum, tmp);
+           }catch(ErrorException e){
+               std::cout << e.getMessage() << std::endl;
+               //delete
+               program.removeSourceLine(lineNum);
+           }
            return;
        }
        if(nextToken == "REM"){
-           program.addSourceLine(lineNum, line);
+            program.addSourceLine(lineNum, line);
+            try{
+                stateREM *tmp = new stateREM(scanner);
+                program.setParsedStatement(lineNum, tmp);
+            }catch(ErrorException e){
+                std::cout << e.getMessage() << std::endl;
+                program.removeSourceLine(lineNum);
+            }
            return;
        }
        if(nextToken == "GOTO"){
            program.addSourceLine(lineNum, line);
-           program.setParsedStatement(lineNum, new stateGOTO(scanner));
+           try{
+                stateGOTO *tmp = new stateGOTO(scanner);
+                program.setParsedStatement(lineNum, tmp);
+           }catch(ErrorException e){
+                std::cout << e.getMessage() << std::endl;
+                program.removeSourceLine(lineNum);
+           }
            return;
        }
-       if(nextToken == "RUN"){
+       if(nextToken == "INPUT"){
            program.addSourceLine(lineNum, line);
-           program.setParsedStatement(lineNum, new stateRUN(scanner));
+           try{
+                stateINPUT *tmp = new stateINPUT(scanner);
+                program.setParsedStatement(lineNum, tmp);
+           }catch(ErrorException e){
+               std::cout << e.getMessage() << std::endl;
+               program.removeSourceLine(lineNum);
+           }
+           return;
        }
        throw(ErrorException("SYNTAX ERROR"));
    }
